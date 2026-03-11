@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package br.com.henrique.OSApiApplication.controller;
+package br.com.henrique.OSApiApplication.api.controller;
 
 import br.com.henrique.OSApiApplication.domain.model.Cliente;
 import br.com.henrique.OSApiApplication.domain.repository.ClienteRepository;
+import br.com.henrique.OSApiApplication.domain.service.ClienteService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,9 @@ public class ClienteController {
 
     @Autowired
     private ClienteRepository clienteRepository;
+    
+    @Autowired
+    private ClienteService clienteService;
 
     @GetMapping("/clientes")
     public List<Cliente> listas() {
@@ -52,7 +56,7 @@ public class ClienteController {
     @PostMapping("/clientes")
     @ResponseStatus(HttpStatus.CREATED)
     public Cliente adicionar(@Valid @RequestBody Cliente cliente) {
-        return clienteRepository.save(cliente);
+        return clienteService.salvar(cliente);
     }
 
     @PutMapping("/clientes/{clienteID}")
@@ -62,7 +66,7 @@ public class ClienteController {
             return ResponseEntity.notFound().build();
         }
         cliente.setId(clienteID);
-        cliente = clienteRepository.save(cliente);
+        cliente = clienteService.salvar(cliente);
         return ResponseEntity.ok(cliente);
     }
 
@@ -71,7 +75,7 @@ public class ClienteController {
         if (!clienteRepository.existsById(clienteID)) {
             return ResponseEntity.notFound().build();
         }
-        clienteRepository.deleteById(clienteID);
+        clienteService.excluir(clienteID);
         return ResponseEntity.noContent().build();
     }
 }

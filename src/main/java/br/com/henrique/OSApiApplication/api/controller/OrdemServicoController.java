@@ -55,7 +55,7 @@ public class OrdemServicoController {
         }
     }
 
-    @GetMapping("/ordem-servico/buscarOrdem/{ordemServicoID}")
+    @GetMapping("/ordem-servico/buscar-ordem/{ordemServicoID}")
     public ResponseEntity<OrdemServico> buscarOrdemServico(@PathVariable Long ordemServicoID) {
         Optional<OrdemServico> ordemServico = ordemServicoRepository.findById(ordemServicoID);
         if (ordemServico.isPresent()) {

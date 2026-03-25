@@ -4,6 +4,7 @@
  */
 package br.com.henrique.OSApiApplication.api.controller;
 
+import br.com.henrique.OSApiApplication.domain.dto.AtualizaStatusDTO;
 import br.com.henrique.OSApiApplication.domain.model.OrdemServico;
 import br.com.henrique.OSApiApplication.domain.repository.OrdemServicoRepository;
 import br.com.henrique.OSApiApplication.domain.service.OrdemServicoService;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,10 +46,20 @@ public class OrdemServicoController {
     }
 
     @GetMapping("/ordem-servico/{clienteID}")
-    public ResponseEntity<OrdemServico> buscar(@PathVariable Long clienteID) {
-        Optional<OrdemServico> cliente = ordemServicoRepository.findById(clienteID);
-        if (cliente.isPresent()) {
-            return ResponseEntity.ok(cliente.get());
+    public ResponseEntity<List<OrdemServico>> buscar(@PathVariable Long clienteID) {
+        List<OrdemServico> ordensCliente = ordemServicoRepository.findByClienteId(clienteID);
+        if (ordensCliente.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(ordensCliente);
+        }
+    }
+
+    @GetMapping("/ordem-servico/buscarOrdem/{ordemServicoID}")
+    public ResponseEntity<OrdemServico> buscarOrdemServico(@PathVariable Long ordemServicoID) {
+        Optional<OrdemServico> ordemServico = ordemServicoRepository.findById(ordemServicoID);
+        if (ordemServico.isPresent()) {
+            return ResponseEntity.ok(ordemServico.get());
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -61,11 +71,11 @@ public class OrdemServicoController {
         return ordemServicoService.criar(ordemServico);
     }
 
-    @PutMapping("/ordem-servico/{ordem_servicoID}")
-    public ResponseEntity<OrdemServico> atualizar(@Valid @PathVariable Long ordem_servicoID,
+    @PutMapping("/ordem-servico/{ordemServicoID}")
+    public ResponseEntity<OrdemServico> atualizar(@Valid @PathVariable Long ordemServicoID,
             @RequestBody OrdemServico ordemServico) {
 
-        Optional<OrdemServico> osAtual = ordemServicoRepository.findById(ordem_servicoID);
+        Optional<OrdemServico> osAtual = ordemServicoRepository.findById(ordemServicoID);
 
         if (osAtual.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -76,21 +86,35 @@ public class OrdemServicoController {
         ordemServicoExistente.setDescricao(ordemServico.getDescricao());
         ordemServicoExistente.setCliente(ordemServico.getCliente());
         ordemServicoExistente.setPreco(ordemServico.getPreco());
-        
+
         if (ordemServico.getStatus() != null) {
             ordemServicoExistente.setStatus(ordemServico.getStatus());
         }
-        
+
         ordemServicoExistente = ordemServicoService.salvar(ordemServicoExistente);
         return ResponseEntity.ok(ordemServico);
     }
-
-    @DeleteMapping("/ordem-servico/{ordem_servicoID}")
-    public ResponseEntity<Void> excluir(@PathVariable Long ordem_servicoID) {
-        if (!ordemServicoRepository.existsById(ordem_servicoID)) {
+    
+    @PutMapping("/ordem-servico/atualiza-status/{ordemServicoID}")
+    public ResponseEntity<OrdemServico> atualizaStatus(@PathVariable Long ordemServicoID,
+            @Valid @RequestBody AtualizaStatusDTO statusDTO) {
+        Optional<OrdemServico> optOS = ordemServicoService.atualizaStatus(
+                ordemServicoID,
+                statusDTO.status());
+        
+        if (optOS.isPresent()) {
+            return ResponseEntity.ok(optOS.get());
+        } else {
             return ResponseEntity.notFound().build();
         }
-        ordemServicoService.excluir(ordem_servicoID);
+    }
+
+    @DeleteMapping("/ordem-servico/{ordemServicoID}")
+    public ResponseEntity<Void> excluir(@PathVariable Long ordemServicoID) {
+        if (!ordemServicoRepository.existsById(ordemServicoID)) {
+            return ResponseEntity.notFound().build();
+        }
+        ordemServicoService.excluir(ordemServicoID);
         return ResponseEntity.noContent().build();
     }
 }

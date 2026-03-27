@@ -4,6 +4,7 @@
  */
 package br.com.henrique.OSApiApplication.domain.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,12 +25,16 @@ import java.util.Objects;
 public class OrdemServico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(name = "ID da ordem de serviço", example = "1", required = true)
     private Long id;
     
     @ManyToOne
     private Cliente cliente;
     
+    @Schema(name = "Descrição da ordem de serviço", example = "Notebook positivo - ventoinha não funciona", required = false)
     private String descricao;
+    
+    @Schema(name = "Preço do serviço", example = "$100.00", required = true)
     private BigDecimal preco;
     
     @Enumerated(EnumType.STRING)
